@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -25,22 +26,16 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
-import java.nio.channels.MulticastChannel
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
-    val image = "https://media.istockphoto.com/photos/portrait-of-a-girl-picture-id938709362?s=612x612"
     private lateinit var activityMainBinding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityMainBinding= ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
 
-        Glide.with(this)
-            .load(image)
-            .centerCrop()
-            .into(activityMainBinding.profileImage)
-
-        activityMainBinding.profileImage.setOnClickListener{
+        activityMainBinding.selectImage.setOnClickListener{
            customDialogImageSelection()
         }
 
@@ -109,9 +104,15 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun getPhotoFile(fileName: String): File {
+        val directoryStorage = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(fileName, ".jpg", directoryStorage)
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if(resultCode == Activity.RESULT_OK){
             if (resultCode == CAMERA){
                 data?.extras?.let {
